@@ -1,40 +1,62 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"net/http"
-	// "fmt"
+	"os"
 
-	"github.com/google/go-github/github"
-	"golang.org/x/oauth2"
+	"github.com/saulhoward/acr/github"
 )
 
-var repos []github.Repository
-var client *github.Client
+var (
+	ghToken = flag.String("github-token", "", "GitHub access token")
+	verbose = flag.Bool("v", false, "verbose output")
+)
 
-func listRepos(w http.ResponseWriter, r *http.Request) {
-	opt := &github.RepositoryListOptions{Type: "all", Sort: "updated", Direction: "desc", IncludeOrg: true}
-	repos, _, err := client.Repositories.List("", opt)
+func log(s string) {
+	if *verbose {
+		fmt.Fprintf(os.Stderr, s)
+	}
+}
+
+func main() {
+	flag.Usage = usage
+	flag.Parse()
+
+	github.InitClient(ghToken)
+
+	repos, err := github.ListRepos()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
+	} else {
+		for _, r := range repos {
+			fmt.Fprintf(os.Stderr, "%v\n", r)
+		}
+	}
+
+	// start http interface
+	// mux := http.NewServeMux()
+	// mux.HandleFunc("/", listReposHandler)
+	// http.ListenAndServe(":8083", mux)
+}
+
+func listReposHandler(w http.ResponseWriter, r *http.Request) {
+	repos, err := github.ListRepos()
 	if err != nil {
 		// fmt.Printf("error: %v\n\n", err)
 		io.WriteString(w, err.Error())
 	} else {
 		for _, r := range repos {
-			io.WriteString(w, *r.Name)
+			io.WriteString(w, r)
 		}
 	}
 }
 
-func main() {
-	// github api
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: ""},
-	)
-	tc := oauth2.NewClient(oauth2.NoContext, ts)
-	client = github.NewClient(tc)
-
-	// start http interface
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", listRepos)
-	http.ListenAndServe(":8083", mux)
+func usage() {
+	fmt.Fprintf(os.Stderr, "usage: acr [options]\n")
+	fmt.Fprintf(os.Stderr, "Flags:\n")
+	flag.PrintDefaults()
+	os.Exit(2)
 }
