@@ -1,6 +1,8 @@
 package github
 
 import (
+	"strings"
+
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
@@ -30,4 +32,21 @@ func ListRepos() ([]string, error) {
 	}
 
 	return reposArr, err
+}
+
+func LastCommit() (string, error) {
+	// get last updated repo
+	opt := &github.ListOptions{PerPage: 1}
+	events, _, err := client.Activity.ListEventsPerformedByUser("saulhoward", false, opt)
+	if err != nil {
+		return "", err
+	}
+	repo := events[0].Repo
+
+	// get last commit to that repo
+	commitOpt := &github.CommitsListOptions{Author: "saulhoward"}
+	repoNameParts := strings.Split(*repo.Name, "/")
+	commits, _, err := client.Repositories.ListCommits(repoNameParts[0], repoNameParts[1], commitOpt)
+
+	return *commits[0].Commit.Message, err
 }

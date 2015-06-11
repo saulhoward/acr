@@ -27,13 +27,21 @@ func main() {
 
 	github.InitClient(ghToken)
 
-	repos, err := github.ListRepos()
+	// // list repos
+	// repos, err := github.ListRepos()
+	// if err != nil {
+	// 	fmt.Fprintf(os.Stderr, "%v", err)
+	// } else {
+	// 	for _, r := range repos {
+	// 		fmt.Fprintf(os.Stderr, "%v\n", r)
+	// 	}
+	// }
+
+	commit, err := github.LastCommit()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 	} else {
-		for _, r := range repos {
-			fmt.Fprintf(os.Stderr, "%v\n", r)
-		}
+		fmt.Fprintf(os.Stderr, "%v\n", commit)
 	}
 
 	// start http interface
