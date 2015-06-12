@@ -27,22 +27,23 @@ func main() {
 
 	github.InitClient(ghToken)
 
-	// // list repos
-	// repos, err := github.ListRepos()
-	// if err != nil {
-	// 	fmt.Fprintf(os.Stderr, "%v", err)
-	// } else {
-	// 	for _, r := range repos {
-	// 		fmt.Fprintf(os.Stderr, "%v\n", r)
-	// 	}
-	// }
-
-	commit, err := github.LastCommit()
+	files, err := github.FilesFromLastCommit()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", err)
 	} else {
-		fmt.Fprintf(os.Stderr, "%v\n", commit)
+		for _, f := range files {
+			fmt.Fprintf(os.Stderr, "%v\n", f.Filename)
+
+			// decide if it is go or js or txt
+			// pass it to the processor for the language
+			// print a function out
+
+		}
 	}
+
+	// gofile := *GoFile{
+	// 	Contents: contents
+	// }
 
 	// start http interface
 	// mux := http.NewServeMux()
