@@ -24,6 +24,12 @@ func log(s string) {
 	}
 }
 
+type Token struct {
+	Id      string `json:"id"`
+	Created string `json:"created"`
+	Token   string `json:"token"`
+}
+
 func main() {
 	flag.Usage = usage
 	flag.Parse()
@@ -60,6 +66,19 @@ func main() {
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)
+	})
+
+	r.PUT("/tokens/:id", func(c *gin.Context) {
+		// id := c.Param("id")
+		var token Token
+		c.Bind(&token)
+		c.JSON(200, token)
+
+		// c.JSON(200, gin.H{
+		// 	"status": "posted",
+		// 	"token":  putToken,
+		// 	"id":     id,
+		// })
 	})
 
 	r.GET("/ws", func(c *gin.Context) {
