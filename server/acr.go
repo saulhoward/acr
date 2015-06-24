@@ -3,18 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 
 	"github.com/saulhoward/acr/server/github"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 )
 
 var (
-	ghToken = flag.String("github-token", "", "GitHub access token")
 	verbose = flag.Bool("v", false, "verbose output")
 )
 
@@ -25,39 +21,14 @@ func log(s string) {
 }
 
 type Token struct {
-	Id      string `json:"id"`
-	Created string `json:"created"`
-	Token   string `json:"token"`
+	Id      string       `json:"id"`
+	Created string       `json:"created"`
+	Token   github.Token `json:"token"`
 }
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
-
-	github.InitClient(ghToken)
-
-	files, err := github.FilesFromLastCommit()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v", err)
-	} else {
-		for _, f := range files {
-			fmt.Fprintf(os.Stderr, "%v\n", f.Filename)
-
-			// decide if it is go or js or txt
-			// pass it to the processor for the language
-			// print a function out
-
-		}
-	}
-
-	// gofile := *GoFile{
-	// 	Contents: contents
-	// }
-
-	// start http interface
-	// mux := http.NewServeMux()
-	// mux.HandleFunc("/", listReposHandler)
-	// http.ListenAndServe(":8083", mux)
 
 	r := gin.Default()
 	r.LoadHTMLFiles("./client/static/index.html")
@@ -69,56 +40,33 @@ func main() {
 	})
 
 	r.PUT("/tokens/:id", func(c *gin.Context) {
-		// id := c.Param("id")
+		id := c.Param("id")
 		var token Token
 		c.Bind(&token)
-		c.JSON(200, token)
 
-		// c.JSON(200, gin.H{
-		// 	"status": "posted",
-		// 	"token":  putToken,
-		// 	"id":     id,
-		// })
+		go github.Start(&id, &token.Token)
+
+		c.JSON(201, gin.H{
+			"code":   201,
+			"status": "success",
+			"url":    "/tokens/" + id + "/excerpt",
+		})
 	})
 
-	r.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+	r.GET("/tokens/:id/excerpt", func(c *gin.Context) {
+		id := c.Param("id")
+		excerpt, err := github.GetFile(&id)
+		if err != nil {
+			c.JSON(500, gin.H{
+				"code":   500,
+				"status": "error",
+			})
+		} else {
+			c.JSON(200, excerpt)
+		}
 	})
 
 	r.Run("localhost:12312")
-}
-
-var wsupgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func wshandler(w http.ResponseWriter, r *http.Request) {
-	conn, err := wsupgrader.Upgrade(w, r, nil)
-	if err != nil {
-		fmt.Println("Failed to set websocket upgrade: %+v", err)
-		return
-	}
-
-	for {
-		t, msg, err := conn.ReadMessage()
-		if err != nil {
-			break
-		}
-		conn.WriteMessage(t, msg)
-	}
-}
-
-func listReposHandler(w http.ResponseWriter, r *http.Request) {
-	repos, err := github.ListRepos()
-	if err != nil {
-		// fmt.Printf("error: %v\n\n", err)
-		io.WriteString(w, err.Error())
-	} else {
-		for _, r := range repos {
-			io.WriteString(w, r)
-		}
-	}
 }
 
 func usage() {

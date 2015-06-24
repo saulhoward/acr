@@ -2,6 +2,7 @@ package github
 
 import (
 	"encoding/base64"
+	"errors"
 	"strings"
 
 	"github.com/google/go-github/github"
@@ -9,37 +10,57 @@ import (
 )
 
 type File struct {
-	Filename string
-	Content  string
+	Filename string `json:"filename"`
+	Content  string `json:"content"`
 }
 
-var client *github.Client
+type Token string
 
-func InitClient(token *string) {
+var files map[string][]File
+var pointers map[string]int
+
+func init() {
+	files = make(map[string][]File)
+	pointers = make(map[string]int)
+}
+
+func Start(id *string, token *Token) {
+	var client *github.Client
 	if *token != "" {
 		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: *token},
+			&oauth2.Token{AccessToken: string(*token)},
 		)
 		tc := oauth2.NewClient(oauth2.NoContext, ts)
 		client = github.NewClient(tc)
 	} else {
 		client = github.NewClient(nil)
 	}
-}
 
-func ListRepos() ([]string, error) {
-	opt := &github.RepositoryListOptions{Type: "all", Sort: "updated", Direction: "desc", IncludeOrg: true}
-	repos, _, err := client.Repositories.List("", opt)
-
-	reposArr := make([]string, len(repos))
-	for i := 0; i < len(repos); i++ {
-		reposArr[i] = *repos[i].Name
+	lastCommit, err := filesFromLastCommit(client)
+	if err != nil {
+		emptyArr := make([]File, 0)
+		files[*id] = emptyArr
+	} else {
+		files[*id] = lastCommit
+		pointers[*id] = 0
 	}
-
-	return reposArr, err
 }
 
-func FilesFromLastCommit() ([]File, error) {
+func GetFile(id *string) (File, error) {
+	f := files[*id]
+	p := pointers[*id]
+	if len(f) == 0 {
+		return File{}, errors.New("No files")
+	}
+	if p < len(f) {
+		pointers[*id] = p + 1
+		return f[p], nil
+	}
+	pointers[*id] = 0
+	return GetFile(id)
+}
+
+func filesFromLastCommit(client *github.Client) ([]File, error) {
 	// get last updated repo
 	opt := &github.ListOptions{PerPage: 1}
 	events, _, err := client.Activity.ListEventsPerformedByUser("saulhoward", false, opt)
