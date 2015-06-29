@@ -32,7 +32,7 @@ export default class AddTokenForm extends Component {
 					onChange={this.updateToken}
 					placeholder="GHToken"
 					type="text"
-				></Input>
+				/>
 				<Button
 					disabled={this.state.submitDisabled}
 					onClick={this.addToken}

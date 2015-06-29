@@ -2,7 +2,6 @@ package github
 
 import (
 	"encoding/base64"
-	"errors"
 	"strings"
 
 	"github.com/google/go-github/github"
@@ -16,15 +15,7 @@ type File struct {
 
 type Token string
 
-var files map[string][]File
-var pointers map[string]int
-
-func init() {
-	files = make(map[string][]File)
-	pointers = make(map[string]int)
-}
-
-func Start(id *string, token *Token) {
+func GetFiles(id *string, token *Token) ([]File, error) {
 	var client *github.Client
 	if *token != "" {
 		ts := oauth2.StaticTokenSource(
@@ -36,28 +27,7 @@ func Start(id *string, token *Token) {
 		client = github.NewClient(nil)
 	}
 
-	lastCommit, err := filesFromLastCommit(client)
-	if err != nil {
-		emptyArr := make([]File, 0)
-		files[*id] = emptyArr
-	} else {
-		files[*id] = lastCommit
-		pointers[*id] = 0
-	}
-}
-
-func GetFile(id *string) (File, error) {
-	f := files[*id]
-	p := pointers[*id]
-	if len(f) == 0 {
-		return File{}, errors.New("No files")
-	}
-	if p < len(f) {
-		pointers[*id] = p + 1
-		return f[p], nil
-	}
-	pointers[*id] = 0
-	return GetFile(id)
+	return filesFromLastCommit(client)
 }
 
 func filesFromLastCommit(client *github.Client) ([]File, error) {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -20,10 +21,58 @@ func log(s string) {
 	}
 }
 
-type Token struct {
-	Id      string       `json:"id"`
-	Created string       `json:"created"`
-	Token   github.Token `json:"token"`
+type tokenRequest struct {
+	Id       string       `json:"id"`
+	Created  string       `json:"created"`
+	Token    github.Token `json:"token"`
+	Username string       `json:"username"`
+}
+
+var (
+	errNoFilesFound = errors.New("No files found")
+	errNoUserFound  = errors.New("No user found")
+	users           = make(map[string]*user)
+)
+
+type user struct {
+	Username  string
+	Token     github.Token
+	Files     []github.File
+	FileIndex int
+	Error     error
+}
+
+func (u *user) setIndex(i int) {
+	u.FileIndex = i
+}
+
+func fetchFilesForUser(id *string, token *github.Token) {
+	files, err := github.GetFiles(id, token)
+	users[*id] = &user{
+		Token:     *token,
+		Files:     files,
+		FileIndex: 0,
+		Error:     err,
+	}
+}
+
+func getFile(id *string) (github.File, error) {
+	u := users[*id]
+	if u == nil {
+		return github.File{}, errNoUserFound
+	}
+	if len(u.Files) == 0 {
+		if u.Error != nil {
+			return github.File{}, u.Error
+		}
+		return github.File{}, errNoFilesFound
+	}
+	if (u.FileIndex + 1) < len(u.Files) {
+		u.setIndex(u.FileIndex + 1)
+		return u.Files[u.FileIndex], nil
+	}
+	u.setIndex(0)
+	return getFile(id)
 }
 
 func main() {
@@ -39,28 +88,39 @@ func main() {
 		c.HTML(200, "index.html", nil)
 	})
 
-	r.PUT("/tokens/:id", func(c *gin.Context) {
+	r.PUT("/users/:id/tokens", func(c *gin.Context) {
 		id := c.Param("id")
-		var token Token
+		var token tokenRequest
 		c.Bind(&token)
 
-		go github.Start(&id, &token.Token)
+		go fetchFilesForUser(&id, &token.Token)
 
 		c.JSON(201, gin.H{
 			"code":   201,
 			"status": "success",
-			"url":    "/tokens/" + id + "/excerpt",
+			"url":    "/users/" + id + "/excerpts",
 		})
 	})
 
-	r.GET("/tokens/:id/excerpt", func(c *gin.Context) {
+	r.GET("/users/:id/excerpts", func(c *gin.Context) {
 		id := c.Param("id")
-		excerpt, err := github.GetFile(&id)
+		excerpt, err := getFile(&id)
 		if err != nil {
-			c.JSON(500, gin.H{
-				"code":   500,
-				"status": "error",
-			})
+			switch err {
+			case errNoFilesFound:
+			case errNoUserFound:
+				c.JSON(404, gin.H{
+					"code":    404,
+					"status":  "error",
+					"message": err.Error(),
+				})
+			default:
+				c.JSON(500, gin.H{
+					"code":    500,
+					"status":  "error",
+					"message": err.Error(),
+				})
+			}
 		} else {
 			c.JSON(200, excerpt)
 		}

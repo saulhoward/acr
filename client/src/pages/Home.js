@@ -3,6 +3,7 @@ import Marty from 'marty';
 import { Button, Grid, PageHeader, Input } from 'react-bootstrap';
 
 import AddTokenForm from '../components/AddTokenForm';
+import Code from '../components/Code';
 
 class HomePage extends Component {
 
@@ -15,6 +16,7 @@ class HomePage extends Component {
             <Grid>
                 <PageHeader>Home</PageHeader>
 				<AddTokenForm />
+				<Excerpt />
             </Grid>
         );
     }
