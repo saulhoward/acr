@@ -3,10 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import Marty from 'marty';
 import { Button, Input } from 'react-bootstrap';
 
-import CodeStore from '../stores/codeStore';
-import CodeActionCreators from '../actions/codeActionCreators';
-
-export default class Code extends Component {
+export default class Excerpt extends Component {
     static propTypes = {
         code: PropTypes.string.isRequired
     };
@@ -19,19 +16,19 @@ export default class Code extends Component {
         return (
 			<pre>
 				<code>
-				{this.props.code}
+				{this.props.excerpt}
 				</code>
 			</pre>
         );
     }
 }
 
-export default Marty.createContainer(AddTokenForm, {
+export default Marty.createContainer(Excerpt, {
 	listenTo: 'codeStore',
 
 	fetch: {
-		token() {
-			return this.app.codeStore.getCode();
+		excerpt() {
+			return this.app.codeStore.excerpt();
 		}
 	}
 });

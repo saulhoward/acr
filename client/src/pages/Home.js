@@ -3,7 +3,7 @@ import Marty from 'marty';
 import { Button, Grid, PageHeader, Input } from 'react-bootstrap';
 
 import AddTokenForm from '../components/AddTokenForm';
-import Code from '../components/Code';
+import Excerpt from '../components/Excerpt';
 
 class HomePage extends Component {
 

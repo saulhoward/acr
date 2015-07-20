@@ -17,7 +17,7 @@ export default class AddTokenForm extends Component {
 		this.addToken = bind(this.addToken, this);
 
 		this.state = {
-			token: this.props.token,
+			token: this.props.token.token,
 			submitDisabled: true,
 		};
 	}
@@ -66,7 +66,7 @@ export default Marty.createContainer(AddTokenForm, {
 
 	fetch: {
 		token() {
-			return this.app.tokenStore.getToken();
+			return this.app.tokenStore.token();
 		}
 	}
 });

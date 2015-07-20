@@ -3,10 +3,13 @@ import keyMirror from 'keymirror';
 
 export default {
     ActionTypes: createConstants([
-		'RECEIVE_TOKEN',
 		'TOKEN_ADD',
 		'TOKEN_ADD_SUCCESS',
 		'TOKEN_ADD_ERROR',
+
+		'RECEIVE_ID',
+		'RECEIVE_TOKEN',
+		'RECEIVE_EXCERPT',
 	]),
 
     RouteNames: keyMirror({
