@@ -4,16 +4,15 @@ HttpStateSource.removeHook('parseJSON');
 
 export default class AcrHttpAPI extends HttpStateSource {
 
-	addToken(token) {
+	addToken(userID, token) {
 		return this.put({
 			body: token,
-			url: format('/users/' + token.id + '/tokens')
+			url: format('/users/' + userID + '/tokens')
 		})
 		.then(res => {
             if (res.ok) {
-                return res.json();
+                this.app.tokenSourceActionCreators.receiveToken(token);
             }
-            throw new Error('Failed to put token');
         });
 	}
 
@@ -23,9 +22,10 @@ export default class AcrHttpAPI extends HttpStateSource {
 		})
 		.then(res => {
             if (res.ok) {
-                return res.json();
+                return res.json().then(e => {
+                    this.app.codeSourceActionCreators.receiveExcerpt(e);
+                });
             }
-            throw new Error('Failed to get excerpt');
         });
 	}
 }

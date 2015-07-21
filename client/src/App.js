@@ -1,12 +1,14 @@
 import { Application } from 'marty';
 
 import interactionStore from './stores/InteractionStore';
-import tokenStore from './stores/tokenStore';
-import codeStore from './stores/codeStore';
+import acrStore from './stores/acrStore';
 import tokenActionCreators from './actions/tokenActionCreators';
-import idSourceActionCreators from './actions/idSourceActionCreators';
+import tokenSourceActionCreators from './actions/tokenSourceActionCreators';
+import codeSourceActionCreators from './actions/codeSourceActionCreators';
+import userSourceActionCreators from './actions/userSourceActionCreators';
+import excerptActionCreators from './actions/excerptActionCreators';
 import acrAPI from './sources/acrAPI';
-import idStorage from './sources/idStorage';
+import userStorage from './sources/userStorage';
 
 export default class App extends Application {
     constructor(options) {
@@ -16,12 +18,14 @@ export default class App extends Application {
             core: {
                 interactionStore
             },
-			tokenStore,
-            codeStore,
+            acrStore,
 			tokenActionCreators,
-			idSourceActionCreators,
+			userSourceActionCreators,
+			tokenSourceActionCreators,
+			codeSourceActionCreators,
+			excerptActionCreators,
 			acrAPI,
-			idStorage,
+			userStorage,
         });
     }
 }

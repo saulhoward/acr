@@ -5,11 +5,11 @@ import tokenUtils from '../utils/tokenUtils';
 
 export default class TokenActionCreators extends ActionCreators {
 
-	addToken(tokenStr) {
+	addToken(userID, tokenStr) {
 		const token = tokenUtils.createToken(tokenStr);
 		this.dispatch(ActionTypes.TOKEN_ADD, token);
 
-		this.app.acrAPI.addToken(token)
+		this.app.acrAPI.addToken(userID, token)
 			.then(res => {
 				console.log('success', res);
 				this.dispatch(ActionTypes.TOKEN_ADD_SUCCESS, res);

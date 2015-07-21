@@ -3,12 +3,11 @@ import React, { Component, PropTypes } from 'react';
 import Marty from 'marty';
 import { Button, Input } from 'react-bootstrap';
 
-import TokenStore from '../stores/tokenStore';
 import TokenActionCreators from '../actions/tokenActionCreators';
 
 export default class AddTokenForm extends Component {
     static propTypes = {
-        token: PropTypes.string.isRequired
+        token: PropTypes.object.isRequired
     };
 
 	constructor(props, context) {
@@ -56,17 +55,20 @@ export default class AddTokenForm extends Component {
 		e.stopPropagation();
 		e.preventDefault();
 		if (this.state.token.trim() !== "") {
-			this.app.tokenActionCreators.addToken(this.state.token);
+			this.app.tokenActionCreators.addToken(this.props.userID, this.state.token);
 		}
 	}
 }
 
 export default Marty.createContainer(AddTokenForm, {
-	listenTo: 'tokenStore',
+	listenTo: 'acrStore',
 
-	fetch: {
-		token() {
-			return this.app.tokenStore.token();
-		}
-	}
+    fetch: {
+        token() {
+            return this.app.acrStore.token();
+        },
+        userID() {
+            return this.app.acrStore.userID();
+        }
+    }
 });

@@ -1,48 +1,58 @@
 import { handles, Store } from 'marty';
-import { fromJS } from 'immutable';
+import { Record, fromJS } from 'immutable';
 import { ActionTypes } from '../constants';
 
 const TokenRecord = Record({token:'', timestamp: ''})
-const IDRecord = Record({id: ''})
+const UserRecord = Record({id: ''})
 
 export default class ACRStore extends Store {
     constructor(options) {
         super(options);
 
-        this.state = {};
-        // this.state.record = new TokenRecord();
-        // this.state.id = new IDRecord();
+        this.state = {
+            excerpts: fromJS([]),
+        };
+        this.state.token = new TokenRecord();
 
 		this.handlers = {
-			_addID      : ActionTypes.RECEIVE_ID,
-			_addToken   : ActionTypes.RECEIVE_TOKEN,
-			_addExcerpt : ActionTypes.RECEIVE_EXCERPT,
+			_addUserID   : ActionTypes.RECEIVE_USER_ID,
+			_addToken    : ActionTypes.RECEIVE_TOKEN,
+			_addExcerpt  : ActionTypes.RECEIVE_EXCERPT,
+			_nextExcerpt : ActionTypes.NEXT_EXCERPT,
 		};
     }
 
 	_addToken(token) {
         this.state.token = new TokenRecord(token);
-	}
-
-	_addID(id) {
-        this.state.id = new IDRecord(id);
-	}
-
-	_addExcerpt(e) {
-        this.state = this.state.withMutations(s => {
-            s.setIn('excerpts', e);
-        });
 		this.hasChanged();
 	}
 
-	id() {
+	_addUserID(id) {
+        this.state.user = new UserRecord({id});
+		this.hasChanged();
+	}
+
+	_addExcerpt(e) {
+        this.state.excerpts = this.state.excerpts.push(e);
+		this.hasChanged();
+	}
+
+    _nextExcerpt() {
+        this.app.acrAPI.getNextExcerpt(this.state.user.id);
+    }
+
+	userID() {
 		return this.fetch({
-			id: "id",
+			id: "userID",
 			locally() {
-				return this.state.id;
-			}
+                if (this.state.user) {
+                    return this.state.user.id;
+                }
+				return undefined;
+			},
             remotely() {
-                return this.app.idStorage.getID();
+                this.app.userStorage.getUserID();
+                return true;
             }
 		})
 	}
@@ -50,68 +60,26 @@ export default class ACRStore extends Store {
 	token() {
 		return this.fetch({
 			id: "token",
-            dependsOn: this.id(),
+            dependsOn: this.userID(),
 			locally() {
 				return this.state.token;
 			}
 		})
 	}
 
-	systems() {
+	excerpt() {
 		return this.fetch({
-			id: "systems",
-			dependsOn: this.project({}),
+			id: "excerpt",
+            dependsOn: this.token(),
 			locally() {
-				return this.state.get('systems');
+                if (this.state.excerpts.size > 0) {
+                    return this.state.excerpts.last();
+                }
+                return undefined;
 			},
-			remotely() {
-				const project = this.state.get('project').toJS();
-				return this.app.phsAPI.fetchDataSource(
-					ActionTypes.RECEIVE_PROJECT_SYSTEMS,
-					{
-						owner: project.organization,
-						project: project.name,
-						path: 'all-systems' 
-					}
-				);
-			}
-		})
-	}
-
-	projectStats() {
-		return this.fetch({
-			id: "projectStats",
-			dependsOn: this.project({}),
-			locally() {
-				return this.state.get('stats');
-			},
-			remotely() {
-				const project = this.state.get('project').toJS();
-				return this.app.systemAPI.fetchStatsForProject(
-					project.organization, project.name
-				);
-			}
-		})
-	}
-
-	systemLocations() {
-		return this.fetch({
-			id: "systemLocations",
-			dependsOn: this.project({}),
-			locally() {
-				return this.state.get('systemLocations');
-			},
-			remotely() {
-				const project = this.state.get('project').toJS();
-				return this.app.phsAPI.fetchDataSource(
-					ActionTypes.RECEIVE_PROJECT_SYSTEM_LOCATIONS,
-					{
-						owner: project.organization,
-						project: project.name,
-						path: 'location' 
-					}
-				);
-			}
+            remotely() {
+                return this.app.acrAPI.getNextExcerpt(this.state.user.id);
+            }
 		})
 	}
 }

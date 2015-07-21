@@ -12,14 +12,26 @@ class HomePage extends Component {
 	}
 
     render() {
+        let body;
+        if (this.props.token.token != '') {
+            body = <Excerpt />;
+        }
         return (
             <Grid>
                 <PageHeader>Home</PageHeader>
 				<AddTokenForm />
-				<Excerpt />
+                { body }
             </Grid>
         );
     }
 }
 
-export default Marty.createContainer(HomePage);
+export default Marty.createContainer(HomePage, {
+	listenTo: 'acrStore',
+
+	fetch: {
+		token() {
+			return this.app.acrStore.token();
+		}
+	}
+});
