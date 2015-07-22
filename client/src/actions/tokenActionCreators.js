@@ -7,16 +7,14 @@ export default class TokenActionCreators extends ActionCreators {
 
 	addToken(userID, tokenStr) {
 		const token = tokenUtils.createToken(tokenStr);
-		this.dispatch(ActionTypes.TOKEN_ADD, token);
+        this.dispatch(ActionTypes.RECEIVE_INTERACTION_STARTED, 'addToken');
 
 		this.app.acrAPI.addToken(userID, token)
 			.then(res => {
-				console.log('success', res);
-				this.dispatch(ActionTypes.TOKEN_ADD_SUCCESS, res);
+				this.dispatch(ActionTypes.RECEIVE_INTERACTION_DONE, 'addToken');
 			})
 			.catch(err => {
-				console.log('an error', err);
-				this.dispatch(ActionTypes.TOKEN_ADD_ERROR, err);
+				this.dispatch(ActionTypes.RECEIVE_INTERACTION_FAILED, 'addToken', err);
 			});
 	}
 }

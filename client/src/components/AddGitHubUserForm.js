@@ -5,7 +5,7 @@ import { Button, Input } from 'react-bootstrap';
 
 import TokenActionCreators from '../actions/tokenActionCreators';
 
-export default class AddTokenForm extends Component {
+export default class AddGitHubUserForm extends Component {
     static propTypes = {
         token: PropTypes.object.isRequired
     };
@@ -16,6 +16,7 @@ export default class AddTokenForm extends Component {
 		this.addToken = bind(this.addToken, this);
 
 		this.state = {
+			username: this.props.user.username,
 			token: this.props.token.token,
 			submitDisabled: true,
 		};
@@ -24,6 +25,14 @@ export default class AddTokenForm extends Component {
     render() {
         return (
 			<form>
+				<Input
+					ref="username"
+					name="username"
+					value={this.state.username}
+					onChange={this.updateUsername}
+					placeholder="GHUsername"
+					type="text"
+				/>
 				<Input
 					ref="token"
 					name="token"
@@ -43,11 +52,25 @@ export default class AddTokenForm extends Component {
         );
     }
 
+    submitDisabled() {
+		const token = this.refs['token'].getValue();
+		const username = this.refs['username'].getValue();
+        return (token.trim() !== '') && (username.trim() !== '')  ? false : true;
+    }
+
+	updateUsername(e) {
+		const username = this.refs['username'].getValue();
+		this.setState({
+			username: username,
+			submitDisabled: this.submitDisabled(),
+		});
+	}
+
 	updateToken(e) {
 		const token = this.refs['token'].getValue();
 		this.setState({
 			token: token,
-			submitDisabled: token.trim() !== '' ? false : true
+			submitDisabled: this.submitDisabled(),
 		});
 	}
 
@@ -69,6 +92,9 @@ export default Marty.createContainer(AddTokenForm, {
         },
         userID() {
             return this.app.acrStore.userID();
+        },
+        user() {
+            return this.app.acrStore.user();
         }
     }
 });

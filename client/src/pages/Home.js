@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Marty from 'marty';
 import { Button, Grid, PageHeader, Input } from 'react-bootstrap';
 
-import AddTokenForm from '../components/AddTokenForm';
+import AddGitHubUserForm from '../components/AddGitHubUserForm';
 import Excerpt from '../components/Excerpt';
 
 class HomePage extends Component {
@@ -19,7 +19,7 @@ class HomePage extends Component {
         return (
             <Grid>
                 <PageHeader>Home</PageHeader>
-				<AddTokenForm />
+				<AddGitHubUserForm />
                 { body }
             </Grid>
         );

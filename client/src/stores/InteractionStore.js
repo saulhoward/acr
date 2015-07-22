@@ -11,31 +11,38 @@ export default class InteractionStore extends Store {
             errors: {},
             status: {}
         });
+
+        this.handlers = {
+			_setPending : ActionTypes.RECEIVE_INTERACTION_PENDING,
+			_setStarted : ActionTypes.RECEIVE_INTERACTION_STARTED,
+			_setFailed  : ActionTypes.RECEIVE_INTERACTION_FAILED,
+			_setDone    : ActionTypes.RECEIVE_INTERACTION_DONE,
+        };
     }
 
     _setPending(key) {
         this.state = this.state.withMutations(s => {
             s.deleteIn(['errors', key]);
-            s.setIn(['status', key], Status.PENDING);
+            s.setIn(['status', key], Statuses.PENDING);
         });
     }
 
     _setStarted(key) {
         this.state = this.state.withMutations(s => {
             s.deleteIn(['errors', key]);
-            s.setIn(['status', key], Status.STARTED);
+            s.setIn(['status', key], Statuses.STARTED);
         });
     }
 
     _setFailed(key, err) {
         this.state = this.state.withMutations(s => {
             s.setIn(['errors', key], err);
-            s.setIn(['status', key], Status.FAILED);
+            s.setIn(['status', key], Statuses.FAILED);
         });
     }
 
     _setDone(key) {
-        this.state = this.state.setIn(['status', key], Status.DONE);
+        this.state = this.state.setIn(['status', key], Statuses.DONE);
     }
 
     getError(key) {
@@ -43,6 +50,6 @@ export default class InteractionStore extends Store {
     }
 
     getStatus(key) {
-        return this.state.getIn(['status', key], Status.PENDING);
+        return this.state.getIn(['status', key], Statuses.PENDING);
     }
 }

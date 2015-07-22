@@ -46,6 +46,15 @@ func (u *user) setIndex(i int) {
 	u.FileIndex = i
 }
 
+func newUser(token *github.Token) *user {
+	files := make([]github.File, 0)
+	return &user{
+		Token:     *token,
+		Files:     files,
+		FileIndex: 0,
+	}
+}
+
 func fetchFilesForUser(id *string, token *github.Token) {
 	files, err := github.GetFiles(id, token)
 	users[*id] = &user{
@@ -93,6 +102,8 @@ func main() {
 		var token tokenRequest
 		c.Bind(&token)
 
+		users[id] = newUser(&token.Token)
+
 		go fetchFilesForUser(&id, &token.Token)
 
 		c.JSON(201, gin.H{
@@ -107,8 +118,7 @@ func main() {
 		excerpt, err := getFile(&id)
 		if err != nil {
 			switch err {
-			case errNoFilesFound:
-			case errNoUserFound:
+			case errNoFilesFound, errNoUserFound:
 				c.JSON(404, gin.H{
 					"code":    404,
 					"status":  "error",

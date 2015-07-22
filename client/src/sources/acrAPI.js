@@ -23,8 +23,14 @@ export default class AcrHttpAPI extends HttpStateSource {
 		.then(res => {
             if (res.ok) {
                 return res.json().then(e => {
-                    this.app.codeSourceActionCreators.receiveExcerpt(e);
+                    this.app.excerptSourceActionCreators.receiveExcerpt(e);
                 });
+            } else {
+                if (res.status == 404)  {
+                    return res.json().then(e => {
+                        this.app.excerptSourceActionCreators.receiveExcerpt({});
+                    });
+                }
             }
         });
 	}

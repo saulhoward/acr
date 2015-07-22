@@ -3,15 +3,16 @@ import keyMirror from 'keymirror';
 
 export default {
     ActionTypes: createConstants([
-		'TOKEN_ADD',
-		'TOKEN_ADD_SUCCESS',
-		'TOKEN_ADD_ERROR',
-
 		'RECEIVE_USER_ID',
 		'RECEIVE_TOKEN',
 		'RECEIVE_EXCERPT',
 
         'NEXT_EXCERPT',
+
+        'RECEIVE_INTERACTION_PENDING',
+        'RECEIVE_INTERACTION_STARTED',
+        'RECEIVE_INTERACTION_FAILED',
+        'RECEIVE_INTERACTION_DONE',
 	]),
 
     RouteNames: keyMirror({
@@ -20,7 +21,7 @@ export default {
 
     Interactions: {},
 
-    Status: keyMirror({
+    Statuses: keyMirror({
         PENDING: null,
         STARTED: null,
         FAILED: null,
