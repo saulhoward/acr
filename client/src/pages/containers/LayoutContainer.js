@@ -1,8 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import { Navbar, Nav } from 'react-bootstrap';
 import { RouteHandler } from 'react-router';
-import { NavItemLink } from 'react-router-bootstrap';
-
 import { RouteNames } from '../../constants';
 
 export default class LayoutContainer extends Component {
@@ -12,12 +9,9 @@ export default class LayoutContainer extends Component {
 
     render() {
         return (
-            <div>
-                <Navbar brand='acr' fixedTop>
-                    <Nav>
-                        <NavItemLink to={RouteNames.HOME}>Home</NavItemLink>
-                    </Nav>
-                </Navbar>
+            <div className="mui-container">
+                <div className="mui-appbar">
+                </div>
                 <RouteHandler />
             </div>
         );

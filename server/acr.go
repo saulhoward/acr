@@ -35,29 +35,31 @@ var (
 )
 
 type user struct {
-	Username  string
-	Token     github.Token
-	Files     []github.File
-	FileIndex int
-	Error     error
+	Username  string        `json:"username"`
+	Token     github.Token  `json:"token"`
+	Files     []github.File `json:"-"`
+	FileIndex int           `json:"-"`
+	Error     error         `json:"-"`
 }
 
 func (u *user) setIndex(i int) {
 	u.FileIndex = i
 }
 
-func newUser(token *github.Token) *user {
+func newUser(username *string, token *github.Token) *user {
 	files := make([]github.File, 0)
 	return &user{
+		Username:  *username,
 		Token:     *token,
 		Files:     files,
 		FileIndex: 0,
 	}
 }
 
-func fetchFilesForUser(id *string, token *github.Token) {
-	files, err := github.GetFiles(id, token)
+func fetchFilesForUser(id *string, username *string, token *github.Token) {
+	files, err := github.GetFiles(id, username, token)
 	users[*id] = &user{
+		Username:  *username,
 		Token:     *token,
 		Files:     files,
 		FileIndex: 0,
@@ -102,15 +104,29 @@ func main() {
 		var token tokenRequest
 		c.Bind(&token)
 
-		users[id] = newUser(&token.Token)
+		users[id] = newUser(&token.Username, &token.Token)
 
-		go fetchFilesForUser(&id, &token.Token)
+		go fetchFilesForUser(&id, &token.Username, &token.Token)
 
 		c.JSON(201, gin.H{
 			"code":   201,
 			"status": "success",
 			"url":    "/users/" + id + "/excerpts",
 		})
+	})
+
+	r.GET("/users/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		u := users[id]
+		if u == nil {
+			c.JSON(404, gin.H{
+				"code":    404,
+				"status":  "error",
+				"message": errNoUserFound.Error(),
+			})
+		} else {
+			c.JSON(200, u)
+		}
 	})
 
 	r.GET("/users/:id/excerpts", func(c *gin.Context) {

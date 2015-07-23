@@ -5,11 +5,11 @@ import tokenUtils from '../utils/tokenUtils';
 
 export default class TokenActionCreators extends ActionCreators {
 
-	addToken(userID, tokenStr) {
+	addGitHubDetails(userID, username, tokenStr) {
 		const token = tokenUtils.createToken(tokenStr);
         this.dispatch(ActionTypes.RECEIVE_INTERACTION_STARTED, 'addToken');
 
-		this.app.acrAPI.addToken(userID, token)
+		this.app.acrAPI.addGitHubDetails(userID, username, token)
 			.then(res => {
 				this.dispatch(ActionTypes.RECEIVE_INTERACTION_DONE, 'addToken');
 			})

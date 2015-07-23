@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
 import Marty from 'marty';
-import { Button, Grid, PageHeader, Input } from 'react-bootstrap';
-
 import AddGitHubUserForm from '../components/AddGitHubUserForm';
 import Excerpt from '../components/Excerpt';
 
@@ -13,15 +11,14 @@ class HomePage extends Component {
 
     render() {
         let body;
-        if (this.props.token.token != '') {
+        if (this.props.user.token != '') {
             body = <Excerpt />;
         }
         return (
-            <Grid>
-                <PageHeader>Home</PageHeader>
-				<AddGitHubUserForm />
+            <div className="mui-panel">
+                <AddGitHubUserForm />
                 { body }
-            </Grid>
+            </div>
         );
     }
 }
@@ -30,8 +27,8 @@ export default Marty.createContainer(HomePage, {
 	listenTo: 'acrStore',
 
 	fetch: {
-		token() {
-			return this.app.acrStore.token();
+		user() {
+			return this.app.acrStore.user();
 		}
 	}
 });

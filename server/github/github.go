@@ -15,7 +15,7 @@ type File struct {
 
 type Token string
 
-func GetFiles(id *string, token *Token) ([]File, error) {
+func GetFiles(id, username *string, token *Token) ([]File, error) {
 	var client *github.Client
 	if *token != "" {
 		ts := oauth2.StaticTokenSource(
@@ -27,13 +27,13 @@ func GetFiles(id *string, token *Token) ([]File, error) {
 		client = github.NewClient(nil)
 	}
 
-	return filesFromLastCommit(client)
+	return filesFromLastCommit(client, username)
 }
 
-func filesFromLastCommit(client *github.Client) ([]File, error) {
+func filesFromLastCommit(client *github.Client, username *string) ([]File, error) {
 	// get last updated repo
 	opt := &github.ListOptions{PerPage: 1}
-	events, _, err := client.Activity.ListEventsPerformedByUser("saulhoward", false, opt)
+	events, _, err := client.Activity.ListEventsPerformedByUser(*username, false, opt)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func filesFromLastCommit(client *github.Client) ([]File, error) {
 	repoName := repoNameParts[1]
 
 	// get last commit to that repo
-	commitOpt := &github.CommitsListOptions{Author: "saulhoward"}
+	commitOpt := &github.CommitsListOptions{Author: *username}
 	commits, _, err := client.Repositories.ListCommits(repoOwner, repoName, commitOpt)
 	if err != nil {
 		return nil, err

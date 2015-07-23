@@ -4,7 +4,7 @@ import userUtils from '../utils/userUtils';
 export default class UserStorage extends JSONStorageStateSource {
     constructor(options) {
         super(options);
-        this.namespace = 'user';
+        this.namespace = 'acr';
     }
 
     createUserID() {
@@ -19,13 +19,4 @@ export default class UserStorage extends JSONStorageStateSource {
         }
         this.app.userSourceActionCreators.receiveUserID(this.get('id'));
     }
-
-    getUserID() {
-        const id = this.get('id');
-        if (!id) {
-            this.createUserID();
-        }
-        this.app.userSourceActionCreators.receiveUserID(this.get('id'));
-    }
-
 }

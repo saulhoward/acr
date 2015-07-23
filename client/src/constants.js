@@ -5,6 +5,8 @@ export default {
     ActionTypes: createConstants([
 		'RECEIVE_USER_ID',
 		'RECEIVE_TOKEN',
+		'RECEIVE_USERNAME',
+		'RECEIVE_USER',
 		'RECEIVE_EXCERPT',
 
         'NEXT_EXCERPT',

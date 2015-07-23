@@ -1,6 +1,19 @@
-@import 'bootstrap-variables';
-@import '../node_modules/bootstrap-sass/assets/stylesheets/bootstrap';
+@import 'variables';
 
-body {
-    margin-top: 60px;
+// MUICSS + overrides
+$mui-primary-color:            $primary-color;
+$mui-primary-color-dark:       $primary-color-dark;
+$mui-primary-color-light:      $primary-color-light;
+$mui-accent-color:             $accent-color;
+$mui-accent-color-dark:        $accent-color-dark;
+$mui-accent-color-light:       $accent-color-light;
+$mui-danger-color:             red;
+$mui-base-font-color:          $text-color-dark-on-light;
+$mui-body-bg-color:            $grey-color-dark;
+$mui-base-font-family:         "Ubuntu", sans-serif;
+@import '../node_modules/muicss/src/sass/mui';
+
+
+code, kbd, pre, samp {
+    font-family: "Ubuntu Mono", monospace;
 }
