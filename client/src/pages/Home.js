@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Marty from 'marty';
 import AddGitHubUserForm from '../components/AddGitHubUserForm';
 import Excerpt from '../components/Excerpt';
+import Toolbar from '../components/Toolbar';
 
 class HomePage extends Component {
 
@@ -12,12 +13,16 @@ class HomePage extends Component {
     render() {
         let body;
         if (this.props.user.token != '') {
-            body = <Excerpt />;
+            body = <Excerpt excerpt={this.props.excerpt} />;
+        } else {
+            body = <Excerpt excerpt={this.props.exampleExcerpt} />;
         }
         return (
-            <div className="mui-panel">
-                <AddGitHubUserForm />
-                { body }
+            <div className="main">
+                <div className="primary">
+                    { body }
+                </div>
+                <Toolbar />
             </div>
         );
     }
@@ -29,6 +34,12 @@ export default Marty.createContainer(HomePage, {
 	fetch: {
 		user() {
 			return this.app.acrStore.user();
+		},
+		excerpt() {
+			return this.app.acrStore.excerpt();
+		},
+		exampleExcerpt() {
+			return this.app.acrStore.exampleExcerpt();
 		}
 	}
 });

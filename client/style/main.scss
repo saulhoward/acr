@@ -14,6 +14,92 @@ $mui-base-font-family:         "Ubuntu", sans-serif;
 @import '../node_modules/muicss/src/sass/mui';
 
 
+// layout
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#app {
+    height: 100%;
+    > div {
+      height: 100%;
+    }
+}
+.container {
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    align-content: stretch;
+
+    > .mui-appbar {
+
+    }
+    > .main {
+        flex: 1;
+        margin-bottom: 0;
+
+        height: 100%;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        .primary {
+            flex: 1;
+
+            height: 100%;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+    }
+    > footer {
+        background-color: $grey-color-light;
+        color: $text-color-light-on-dark-secondary;
+    }
+}
+
+// typography
 code, kbd, pre, samp {
     font-family: "Ubuntu Mono", monospace;
+}
+
+// modal
+.mui-overlay {
+    @extend #mui-overlay;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+.settings-modal {
+    width: 80%;
+    max-width: 600px;
+    height: 80%;
+    min-height: 400px;
+    margin: 100px auto;
+    background-color: rgb(255, 255, 255);
+    padding: 15px;
+}
+
+// excerpt
+.excerpt {
+    flex: 1;
+    width: 100%;
+    max-width: 60em;
+    max-height: 40em;
+    margin: 0 auto;
+    overflow-y: scroll;
+
+    color: $text-color-light-on-dark;
+    padding: 25px;
+    font-size: 1.8rem;
+    pre {
+        overflow: hidden;
+    }
+
+    background-color: rgba(0,0,0,0.4);
 }

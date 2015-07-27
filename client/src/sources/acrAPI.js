@@ -55,4 +55,23 @@ export default class AcrHttpAPI extends HttpStateSource {
             }
         });
     }
+
+    getNextExampleExcerpt() {
+        return this.get({
+            url: format('/excerpts')
+        })
+        .then(res => {
+            if (res.ok) {
+                return res.json().then(e => {
+                    this.app.excerptSourceActionCreators.receiveExampleExcerpt(e);
+                });
+            } else {
+                if (res.status == 404)  {
+                    return res.json().then(e => {
+                        this.app.excerptSourceActionCreators.receiveExampleExcerpt({});
+                    });
+                }
+            }
+        });
+    }
 }

@@ -5,4 +5,8 @@ export default class CodeSourceActionCreators extends ActionCreators {
 	receiveExcerpt(e) {
 		this.dispatch(ActionTypes.RECEIVE_EXCERPT, e);
 	}
+
+	receiveExampleExcerpt(e) {
+		this.dispatch(ActionTypes.RECEIVE_EXAMPLE_EXCERPT, e);
+	}
 }

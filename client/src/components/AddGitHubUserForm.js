@@ -33,38 +33,41 @@ export default class AddGitHubUserForm extends Component {
 
     render() {
         return (
-			<form>
-                <div className="mui-form-group">
-                    <input
-                        className="mui-form-control" 
-                        ref="username"
-                        name="username"
-                        value={this.state.username}
-                        onChange={this.updateUsername}
-                        placeholder="GHUsername"
-                        type="text"
-                    />
-                </div>
-                <div className="mui-form-group">
-                    <input
-                        className="mui-form-control" 
-                        ref="token"
-                        name="token"
-                        value={this.state.token}
-                        onChange={this.updateToken}
-                        placeholder="GHToken"
-                        type="text"
-                    />
-                </div>
-				<button
-                    className="mui-btn mui-btn-primary mui-btn-raised"
-					disabled={this.state.submitDisabled}
-					onClick={this.addToken}
-					bsStyle="primary"
-				>
-					Add token
-				</button>
-			</form>
+            <div>
+                <h2>Add GitHub user account</h2>
+                <form>
+                    <div className="mui-form-group">
+                        <input
+                            className="mui-form-control" 
+                            ref="username"
+                            name="username"
+                            value={this.state.username}
+                            onChange={this.updateUsername}
+                            placeholder="GHUsername"
+                            type="text"
+                        />
+                    </div>
+                    <div className="mui-form-group">
+                        <input
+                            className="mui-form-control" 
+                            ref="token"
+                            name="token"
+                            value={this.state.token}
+                            onChange={this.updateToken}
+                            placeholder="GHToken"
+                            type="text"
+                        />
+                    </div>
+                    <button
+                        className="mui-btn mui-btn-primary mui-btn-raised"
+                        disabled={this.state.submitDisabled}
+                        onClick={this.addToken}
+                        bsStyle="primary"
+                    >
+                        Add token
+                    </button>
+                </form>
+            </div>
         );
     }
 

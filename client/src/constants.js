@@ -8,6 +8,7 @@ export default {
 		'RECEIVE_USERNAME',
 		'RECEIVE_USER',
 		'RECEIVE_EXCERPT',
+		'RECEIVE_EXAMPLE_EXCERPT',
 
         'NEXT_EXCERPT',
 

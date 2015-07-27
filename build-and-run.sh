@@ -1,2 +1,2 @@
 #!/bin/bash
-go build ./server/acr.go && ./acr -v
+go build -o acr ./server/ && ./acr -v

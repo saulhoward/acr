@@ -4,7 +4,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
 	"os"
+	"path/filepath"
 
 	"github.com/saulhoward/acr/server/github"
 
@@ -32,14 +35,15 @@ var (
 	errNoFilesFound = errors.New("No files found")
 	errNoUserFound  = errors.New("No user found")
 	users           = make(map[string]*user)
+	localFiles      = make([]file, 0)
 )
 
 type user struct {
-	Username  string        `json:"username"`
-	Token     github.Token  `json:"token"`
-	Files     []github.File `json:"-"`
-	FileIndex int           `json:"-"`
-	Error     error         `json:"-"`
+	Username  string       `json:"username"`
+	Token     github.Token `json:"token"`
+	Files     []file       `json:"-"`
+	FileIndex int          `json:"-"`
+	Error     error        `json:"-"`
 }
 
 func (u *user) setIndex(i int) {
@@ -47,7 +51,7 @@ func (u *user) setIndex(i int) {
 }
 
 func newUser(username *string, token *github.Token) *user {
-	files := make([]github.File, 0)
+	files := make([]file, 0)
 	return &user{
 		Username:  *username,
 		Token:     *token,
@@ -61,35 +65,76 @@ func fetchFilesForUser(id *string, username *string, token *github.Token) {
 	users[*id] = &user{
 		Username:  *username,
 		Token:     *token,
-		Files:     files,
+		Files:     githubFiles(files),
 		FileIndex: 0,
 		Error:     err,
 	}
 }
 
-func getFile(id *string) (github.File, error) {
+func getRandomLocalFile() (file, error) {
+	if len(localFiles) == 0 {
+		return file{}, errNoFilesFound
+	}
+	return localFiles[rand.Intn(len(localFiles))], nil
+}
+
+func getUserFile(id *string) (file, error) {
 	u := users[*id]
 	if u == nil {
-		return github.File{}, errNoUserFound
+		return file{}, errNoUserFound
 	}
 	if len(u.Files) == 0 {
 		if u.Error != nil {
-			return github.File{}, u.Error
+			return file{}, u.Error
 		}
-		return github.File{}, errNoFilesFound
+		return file{}, errNoFilesFound
 	}
 	if (u.FileIndex + 1) < len(u.Files) {
 		u.setIndex(u.FileIndex + 1)
 		return u.Files[u.FileIndex], nil
 	}
 	u.setIndex(0)
-	return getFile(id)
+	return getUserFile(id)
+}
+
+func readExampleSourceFiles() ([]file, error) {
+	var files []file
+	dirname := "." + string(filepath.Separator) + "excerpts"
+	d, err := os.Open(dirname)
+	if err != nil {
+		return files, err
+	}
+	defer d.Close()
+	srcFiles, err := d.Readdir(-1)
+	if err != nil {
+		return files, err
+	}
+	for _, f := range srcFiles {
+		if f.Mode().IsRegular() {
+			filePath := dirname + string(filepath.Separator) + f.Name()
+			fileBytes, err := ioutil.ReadFile(filePath)
+			if err == nil {
+				fileStr := string(fileBytes[:])
+				files = append(files, file{Filename: f.Name(), Content: fileStr})
+			}
+		}
+	}
+	return files, nil
 }
 
 func main() {
 	flag.Usage = usage
 	flag.Parse()
 
+	// Load local example src files
+	var err error
+	localFiles, err = readExampleSourceFiles()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// HTML server
 	r := gin.Default()
 	r.LoadHTMLFiles("./client/static/index.html")
 	r.Static("/js", "./client/static/js")
@@ -129,9 +174,31 @@ func main() {
 		}
 	})
 
+	r.GET("/excerpts", func(c *gin.Context) {
+		excerpt, err := getRandomLocalFile()
+		if err != nil {
+			switch err {
+			case errNoFilesFound:
+				c.JSON(404, gin.H{
+					"code":    404,
+					"status":  "error",
+					"message": err.Error(),
+				})
+			default:
+				c.JSON(500, gin.H{
+					"code":    500,
+					"status":  "error",
+					"message": err.Error(),
+				})
+			}
+		} else {
+			c.JSON(200, excerpt)
+		}
+	})
+
 	r.GET("/users/:id/excerpts", func(c *gin.Context) {
 		id := c.Param("id")
-		excerpt, err := getFile(&id)
+		excerpt, err := getUserFile(&id)
 		if err != nil {
 			switch err {
 			case errNoFilesFound, errNoUserFound:

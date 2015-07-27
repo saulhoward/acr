@@ -11,6 +11,7 @@ export default class ACRStore extends Store {
 
         this.state = {
             excerpts: fromJS([]),
+            exampleExcerpts: fromJS([]),
         };
         this.state.user = new UserRecord();
 
@@ -20,6 +21,7 @@ export default class ACRStore extends Store {
             _addUser     : ActionTypes.RECEIVE_USER,
             _addToken    : ActionTypes.RECEIVE_TOKEN,
             _addExcerpt  : ActionTypes.RECEIVE_EXCERPT,
+            _addExampleExcerpt  : ActionTypes.RECEIVE_EXAMPLE_EXCERPT,
             _nextExcerpt : ActionTypes.NEXT_EXCERPT,
         };
     }
@@ -57,8 +59,17 @@ export default class ACRStore extends Store {
         this.hasChanged();
     }
 
+    _addExampleExcerpt(e) {
+        this.state.exampleExcerpts = this.state.exampleExcerpts.push(e);
+        this.hasChanged();
+    }
+
     _nextExcerpt() {
-        this.app.acrAPI.getNextExcerpt(this.state.user.id);
+        if (this.state.user.username != '') {
+            this.app.acrAPI.getNextExcerpt(this.state.user.id);
+        } else {
+            this.app.acrAPI.getNextExampleExcerpt();
+        }
     }
 
     userID() {
@@ -110,6 +121,21 @@ export default class ACRStore extends Store {
             },
             remotely() {
                 return this.app.acrAPI.getNextExcerpt(this.state.user.id);
+            }
+        })
+    }
+
+    exampleExcerpt() {
+        return this.fetch({
+            id: "exampleExcerpt",
+            locally() {
+                if (this.state.exampleExcerpts.size > 0) {
+                    return this.state.exampleExcerpts.last();
+                }
+                return undefined;
+            },
+            remotely() {
+                return this.app.acrAPI.getNextExampleExcerpt();
             }
         })
     }
